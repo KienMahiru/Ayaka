@@ -51,11 +51,31 @@ def Tachbien():
     edges_label.configure(image=edges_tk)
     edges_label.image = edges_tk
 
+
+def Xoay():
+    global image
+    # Lấy kích thước hình ảnh
+    height, width = image.shape[:2]
+
+    # Tính toán tâm của hình ảnh
+    center = (width // 2, height // 2)
+
+    # Xoay ảnh
+    matrix = cv2.getRotationMatrix2D(center, 90, 1.0)
+    image = cv2.warpAffine(image, matrix, (width, height))
+
+    # Hiển thị ảnh đã xoay
+    img = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    img = img.resize((400, 400))
+    img_tk = ImageTk.PhotoImage(img)
+    img_label.configure(image=img_tk)
+    img_label.image = img_tk
+
 # Tạo cửa sổ giao diện
 window = tk.Tk()
 window.title("Canny Edge Detection")
 window.geometry("850x450")
-
+scale_percent =1
 # Tạo nút "Open Image"
 open_button = tk.Button(window, text="Open Image", command=open_image)
 open_button.pack(pady=10)
@@ -93,8 +113,14 @@ T2_entry.pack(side=tk.LEFT)
 T2_hint_label = tk.Label(T2_frame, text="Khuyến khích chọn ngưỡng 80-100", font=("Arial", 8), fg="gray", bg="white")
 T2_hint_label.pack(side=tk.RIGHT)
 # Tạo nút "Tách biên"
-tachbien_button = tk.Button(window, text="Tách biên", command=Tachbien)
-tachbien_button.pack(pady=10)
+button_frame = tk.Frame(window)
+button_frame.pack(pady=10)
+
+tachbien_button = tk.Button(button_frame, text="Tách biên", command=Tachbien)
+tachbien_button.pack(side=tk.LEFT, padx=5)
+
+nut_xoay = tk.Button(button_frame, text="Xoay", command=Xoay)
+nut_xoay.pack(side=tk.LEFT, padx=5)
 # Tạo hai khung hình để hiển thị ảnh gốc và biên ảnh Canny
 img_frame = tk.Frame(window)
 img_frame.pack(side=tk.LEFT, padx=10)
