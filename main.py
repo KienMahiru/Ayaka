@@ -34,7 +34,11 @@ def open_image():
         img_label.image = img_tk
 
 def Tachbien():
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    try:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    except:
+        messagebox.showerror("Lỗi", "Vui lòng nhập ảnh")
+        return
     # Thiết lập ngưỡng
     try:
         T1 = int(T1_entry.get())
@@ -53,24 +57,27 @@ def Tachbien():
 
 
 def Xoay():
-    global image
-    # Lấy kích thước hình ảnh
-    height, width = image.shape[:2]
+    try:
+        global image
+        # Lấy kích thước hình ảnh
+        height, width = image.shape[:2]
 
-    # Tính toán tâm của hình ảnh
-    center = (width // 2, height // 2)
+        # Tính toán tâm của hình ảnh
+        center = (width // 2, height // 2)
 
-    # Xoay ảnh
-    matrix = cv2.getRotationMatrix2D(center, 90, 1.0)
-    image = cv2.warpAffine(image, matrix, (width, height))
+        # Xoay ảnh
+        matrix = cv2.getRotationMatrix2D(center, 90, 1.0)
+        image = cv2.warpAffine(image, matrix, (width, height))
 
-    # Hiển thị ảnh đã xoay
-    img = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    img = img.resize((400, 400))
-    img_tk = ImageTk.PhotoImage(img)
-    img_label.configure(image=img_tk)
-    img_label.image = img_tk
-
+        # Hiển thị ảnh đã xoay
+        img = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        img = img.resize((400, 400))
+        img_tk = ImageTk.PhotoImage(img)
+        img_label.configure(image=img_tk)
+        img_label.image = img_tk
+    except NameError:
+        messagebox.showerror("Lỗi", "Vui lòng nhập ảnh")
+        return
 # Tạo cửa sổ giao diện
 window = tk.Tk()
 window.title("Canny Edge Detection")
