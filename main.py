@@ -2,9 +2,34 @@ import cv2
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
+import os
 
+
+def save_image(frame):
+    global image, edges, zoom_scale
+    if image is not None:
+        file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[
+                                                 ("PNG files", "*.png"), ("All files", "*.*")])
+        if file_path:
+            if frame == "original":
+                # Apply the zoom factor to the original image before saving
+                zoomed_image = cv2.resize(
+                    image, None, fx=zoom_scale, fy=zoom_scale)
+                cv2.imwrite(file_path, zoomed_image)
+            elif frame == "edges":
+                if edges is None:
+                    messagebox.showerror(
+                        "Lỗi", "Vui lòng thực hiện chức năng tách biên trước khi lưu ảnh tách biên.")
+                    return
+                # Apply the zoom factor to the edges before saving
+                zoomed_edges = cv2.resize(
+                    edges, None, fx=zoom_scale, fy=zoom_scale)
+                cv2.imwrite(file_path, zoomed_edges)
+            messagebox.showinfo("Thông báo", "Ảnh đã được lưu thành công.")
 
 # Mở ảnh từ file
+
+
 def open_image():
     global image, zoom_scale, img_label, edges_label
     file_path = filedialog.askopenfilename()
@@ -58,6 +83,7 @@ def canny_edge_detection(image, T1, T2):
 
 
 def Tachbien():
+    global image, edges
     try:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     except:
@@ -94,11 +120,16 @@ def Xoay():
 
 
 def update_image_display():
-    img = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    img = img.resize((int(400 * zoom_scale), int(400 * zoom_scale)))
-    img_tk = ImageTk.PhotoImage(img)
-    img_label.configure(image=img_tk)
-    img_label.image = img_tk
+    global image, zoom_scale
+    if image is not None:
+        # Convert BGR to RGB
+        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        img = Image.fromarray(rgb_image)
+        img = img.resize((int(400 * zoom_scale), int(400 * zoom_scale)))
+        img_tk = ImageTk.PhotoImage(img)
+        img_label.configure(image=img_tk)
+        img_label.image = img_tk
 
 
 # Phóng to, thu nhỏ ảnh
@@ -119,22 +150,29 @@ def zoom_out():
 def adjust_contrast():
     global image
     if image is not None:
-        # Lấy giá trị từ thanh trượt để điều chỉnh độ tương phản
+        # Convert BGR to RGB
+        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Get the contrast value from the slider
         contrast_value = float(contrast_slider.get())
 
-        # Áp dụng điều chỉnh độ tương phản
+        # Apply contrast adjustment
         adjusted_image = cv2.convertScaleAbs(
-            image, alpha=contrast_value, beta=0)
+            rgb_image, alpha=contrast_value, beta=0)
 
-        # Hiển thị ảnh đầu ra trong frame chứa cả ảnh và kết quả của ảnh khi chỉnh độ tương phản
-        adjusted_img = Image.fromarray(
-            cv2.cvtColor(adjusted_image, cv2.COLOR_BGR2RGB))
+        # Convert back to BGR for further processing if needed
+        image = cv2.cvtColor(adjusted_image, cv2.COLOR_RGB2BGR)
+
+        # Display the adjusted image
+        adjusted_img = Image.fromarray(adjusted_image)
         adjusted_img = adjusted_img.resize(
             (int(400 * zoom_scale), int(400 * zoom_scale)))
         adjusted_img_tk = ImageTk.PhotoImage(adjusted_img)
         img_label.configure(image=adjusted_img_tk)
         img_label.image = adjusted_img_tk
 
+
+edges = None
 
 window = tk.Tk()
 window.title("Canny Edge Detection")
@@ -199,6 +237,16 @@ zoom_out_button.pack(side=tk.LEFT, padx=5)
 clear_frames_button = tk.Button(
     button_frame, text="Xóa ảnh", command=clear_frames)
 clear_frames_button.pack(side=tk.LEFT, padx=5)
+
+# Tạo nút "Lưu ảnh" cho cả ảnh gốc và biên ảnh
+save_original_button = tk.Button(
+    button_frame, text="Lưu ảnh (Original)", command=lambda: save_image("original"))
+save_original_button.pack(side=tk.LEFT, padx=5)
+
+save_edges_button = tk.Button(
+    button_frame, text="Lưu ảnh (Edges)", command=lambda: save_image("edges"))
+save_edges_button.pack(side=tk.LEFT, padx=5)
+
 
 # Thêm thanh trượt độ tương phản vào giao diện người dùng
 contrast_frame = tk.Frame(window, bg="white", padx=20, pady=10)
