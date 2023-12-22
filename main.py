@@ -2,54 +2,67 @@ import cv2
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
-import os
 
 
 def save_image(frame):
-    global image, edges, zoom_scale
-    if image is not None:
-        file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[
-                                                 ("PNG files", "*.png"), ("All files", "*.*")])
-        if file_path:
-            if frame == "original":
-                # Apply the zoom factor to the original image before saving
-                zoomed_image = cv2.resize(
-                    image, None, fx=zoom_scale, fy=zoom_scale)
-                cv2.imwrite(file_path, zoomed_image)
-            elif frame == "edges":
-                if edges is None:
-                    messagebox.showerror(
-                        "Lỗi", "Vui lòng thực hiện chức năng tách biên trước khi lưu ảnh tách biên.")
-                    return
-                # Apply the zoom factor to the edges before saving
-                zoomed_edges = cv2.resize(
-                    edges, None, fx=zoom_scale, fy=zoom_scale)
-                cv2.imwrite(file_path, zoomed_edges)
-            messagebox.showinfo("Thông báo", "Ảnh đã được lưu thành công.")
+    global image, edges, zoom_scale, image_loaded
+    try:
+        if image_loaded:
+            file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[
+                ("PNG files", "*.png"), ("All files", "*.*")])
+            if file_path:
+                if frame == "original":
+                    # Apply the zoom factor to the original image before saving
+                    zoomed_image = cv2.resize(
+                        image, None, fx=zoom_scale, fy=zoom_scale)
+                    cv2.imwrite(file_path, zoomed_image)
+                elif frame == "edges":
+                    if edges is None:
+                        messagebox.showerror(
+                            "Lỗi", "Vui lòng thực hiện chức năng tách biên trước khi lưu ảnh tách biên.")
+                        return
+                    # Apply the zoom factor to the edges before saving
+                    zoomed_edges = cv2.resize(
+                        edges, None, fx=zoom_scale, fy=zoom_scale)
+                    cv2.imwrite(file_path, zoomed_edges)
+                messagebox.showinfo("Thông báo", "Ảnh đã được lưu thành công.")
+        else:
+            messagebox.showinfo(
+                "Thông báo", "Vui lòng nhập ảnh")
+    except:
+        messagebox.showerror("Error", "Vui lòng nhập ảnh")
+
 
 # Mở ảnh từ file
-
-
 def open_image():
-    global image, zoom_scale, img_label, edges_label
+    global image, zoom_scale, img_label, edges_label, image_loaded
     file_path = filedialog.askopenfilename()
+
     if file_path:
-        allowed_extensions = ['.jpg', '.jpeg', '.png']
-        file_extension = file_path[file_path.rfind('.'):]
-        if file_extension.lower() not in allowed_extensions:
-            messagebox.showerror("Lỗi", "Chọn sai tệp ảnh! Vui lòng chọn lại")
-            return
         try:
+            allowed_extensions = ['.jpg', '.jpeg', '.png']
+            file_extension = file_path[file_path.rfind('.'):].lower()
+
+            if file_extension not in allowed_extensions:
+                messagebox.showerror("Lỗi", "Chọn sai định dạng ảnh! Vui lòng chọn lại.")
+                return
+
             img_label.destroy()
             edges_label.destroy()
-        except AttributeError:
-            pass
+            image = cv2.imread(file_path)
+            if image is not None:
+                zoom_scale = 1.0
+                image_loaded = True
+                create_image_labels()
+                update_image_display()
+            else:
+                messagebox.showerror(
+                    "Lỗi", "Không thể đọc ảnh từ file. Vui lòng chọn lại.")
+                image_loaded = False
         except Exception as e:
             print(f"Error: {e}")
-        image = cv2.imread(file_path)
-        zoom_scale = 1.0
-        create_image_labels()
-        update_image_display()
+            messagebox.showerror("Lỗi", "Đã xảy ra lỗi khi mở ảnh.")
+            image_loaded = False
 
 
 def create_image_labels():
@@ -62,9 +75,18 @@ def create_image_labels():
 
 # Xóa ảnh
 def clear_frames():
+    global image, edges, image_loaded
     try:
-        img_label.destroy()
-        edges_label.destroy()
+        if image_loaded:
+            img_label.destroy()
+            edges_label.destroy()
+            image = None  # Cập nhật trạng thái khi xóa ảnh
+            edges = None
+            image_loaded = False
+            messagebox.showinfo("Thông báo", "Ảnh đã được xóa thành công.")
+        else:
+            messagebox.showinfo(
+                "Thông báo", "Vui lòng nhập ảnh")
     except AttributeError:
         pass
     except Exception as e:
@@ -106,14 +128,17 @@ def Tachbien():
 
 # Xoay ảnh
 def Xoay():
+    global image, image_loaded
     try:
-        global image
-        height, width = image.shape[:2]
-        center = (width // 2, height // 2)
-        matrix = cv2.getRotationMatrix2D(center, 90, 1.0)
-        image = cv2.warpAffine(
-            image, matrix, (width, height), borderMode=cv2.BORDER_REPLICATE)
-        update_image_display()
+        if image_loaded:
+            height, width = image.shape[:2]
+            center = (width // 2, height // 2)
+            matrix = cv2.getRotationMatrix2D(center, 90, 1.0)
+            image = cv2.warpAffine(
+                image, matrix, (width, height), borderMode=cv2.BORDER_REPLICATE)
+            update_image_display()
+        else:
+            messagebox.showerror("Lỗi", "Vui lòng nhập ảnh")
     except NameError:
         messagebox.showerror("Lỗi", "Vui lòng nhập ảnh")
         return
@@ -130,49 +155,68 @@ def update_image_display():
         img_tk = ImageTk.PhotoImage(img)
         img_label.configure(image=img_tk)
         img_label.image = img_tk
+    else:
+        # Hiển thị hộp thoại "Vui lòng nhập ảnh" nếu không có ảnh
+        messagebox.showinfo(
+            "Thông báo", "Vui lòng nhập ảnh")
 
 
 # Phóng to, thu nhỏ ảnh
 def zoom_in():
-    global zoom_scale
-    zoom_scale += 0.1
-    update_image_display()
+    try:
+        global zoom_scale
+        zoom_scale += 0.1
+        update_image_display()
+    except:
+        messagebox.showerror("Error", "Vui lòng nhập ảnh")
 
 
 def zoom_out():
-    global zoom_scale
-    if zoom_scale > 0.1:
-        zoom_scale -= 0.1
-        update_image_display()
+    try:
+        global zoom_scale
+        if zoom_scale > 0.1:
+            zoom_scale -= 0.1
+            update_image_display()
+    except:
+        messagebox.showerror("Error", "Vui lòng nhập ảnh")
 
 
 # Điều chỉnh độ tương phản của ảnh
 def adjust_contrast():
-    global image
-    if image is not None:
-        # Convert BGR to RGB
-        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    global image, image_loaded
+    try:
+        if image_loaded:
+            if image is not None:
+                # Convert BGR to RGB
+                rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        # Get the contrast value from the slider
-        contrast_value = float(contrast_slider.get())
+                # Get the contrast value from the slider
+                contrast_value = float(contrast_slider.get())
 
-        # Apply contrast adjustment
-        adjusted_image = cv2.convertScaleAbs(
-            rgb_image, alpha=contrast_value, beta=0)
+                # Apply contrast adjustment
+                adjusted_image = cv2.convertScaleAbs(
+                    rgb_image, alpha=contrast_value, beta=0)
 
-        # Convert back to BGR for further processing if needed
-        image = cv2.cvtColor(adjusted_image, cv2.COLOR_RGB2BGR)
+                # Convert back to BGR for further processing if needed
+                image = cv2.cvtColor(adjusted_image, cv2.COLOR_RGB2BGR)
 
-        # Display the adjusted image
-        adjusted_img = Image.fromarray(adjusted_image)
-        adjusted_img = adjusted_img.resize(
-            (int(400 * zoom_scale), int(400 * zoom_scale)))
-        adjusted_img_tk = ImageTk.PhotoImage(adjusted_img)
-        img_label.configure(image=adjusted_img_tk)
-        img_label.image = adjusted_img_tk
+                # Display the adjusted image
+                adjusted_img = Image.fromarray(adjusted_image)
+                adjusted_img = adjusted_img.resize(
+                    (int(400 * zoom_scale), int(400 * zoom_scale)))
+                adjusted_img_tk = ImageTk.PhotoImage(adjusted_img)
+                img_label.configure(image=adjusted_img_tk)
+                img_label.image = adjusted_img_tk
+        else:
+            messagebox.showerror(
+                "Error", "Vui lòng nhập ảnh")
+    except:
+        messagebox.showerror("Error", "Vui lòng nhập ảnh")
 
 
+image_loaded = False  # Biến kiểm soát trạng thái có ảnh trên giao diện hay không
 edges = None
+zoom_scale = 1.0
 
 window = tk.Tk()
 window.title("Canny Edge Detection")
