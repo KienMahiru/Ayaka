@@ -1,6 +1,15 @@
 
 
 Thuật toán gốc
+	- Khởi tạo camera: mã khởi tạo đối tượng chụp video sử dụng cv2.videocapture(0), chụp video từ camera mặc định (với chỉ số 0).
+	- Vòng lặp chính: chương trình bắt đầu một vòng lặp (while (1)) để liên tục chụp các khung hình từ camera.
+	- Phát hiện màu sắc trong không gian hsv: mỗi khung hình được chuyển từ không gian màu bgr (blue-green-red) sang không gian màu hsv bằng cách sử dụng cv2.cvtcolor(frame, cv2.color_bgr2hsv). Điều này giúp dễ dàng thao 		tác với màu sắc dựa trên màu sắc, độ bão hòa và giá trị/sáng.
+	- Xác định phạm vi màu đỏ: mã định nghĩa ngưỡng dưới và ngưỡng trên của màu đỏ trong không gian màu hsv. Hàm cv2.inrange() tạo ra một mặt nạ để phân đoạn các vùng màu đỏ trong khung hình dựa trên phạm vi được xác định.
+	- Áp dụng mặt nạ: mặt nạ được thu được ở bước trước được áp dụng vào khung hình gốc bằng cách sử dụng cv2.bitwise_and() để chỉ bôi sáng các vùng tương ứng với màu đỏ.
+	- Hiển thị khung hình: mã hiển thị khung hình gốc ('original') và các đường viền được phát hiện bằng thuật toán phát hiện cạnh canny ('edges') trong các cửa sổ riêng biệt bằng cv2.imshow().
+	- Thoát khỏi vòng lặp: vòng lặp có thể được thoát bằng cách nhấn phím 'esc' (k == 27). Điều này giải phóng việc chụp video, đóng tất cả các cửa sổ opencv và kết thúc chương trình.
+
+Ý tưởng cải tiến:
 	Hàm canny_edge_detection(image, t1, t2)	:
 		Thực hiện phát hiện biên canny trên ảnh đầu vào sử dụng các ngưỡng t1 và t2.
 		Đầu vào:
@@ -30,7 +39,6 @@ Thuật toán gốc
 		-	Lấy giá trị ngưỡng từ người dùng và kiểm tra tính hợp lệ của chúng.
 		-	Thực hiện phát hiện biên canny trên ảnh xám sử dụng các ngưỡng đã nhập.
 		-	Hiển thị ảnh biên đã phát hiện trong giao diện.
-Ý tưởng cải tiến:
 	Chức năng lưu ảnh (save_image(frame)):
 
 	-	Cho phép lưu ảnh gốc hoặc ảnh đã phát hiện biên sau khi đã thực hiện các chức năng trên.
