@@ -44,7 +44,8 @@ def open_image():
             file_extension = file_path[file_path.rfind('.'):].lower()
 
             if file_extension not in allowed_extensions:
-                messagebox.showerror("Lỗi", "Chọn sai định dạng ảnh! Vui lòng chọn lại.")
+                messagebox.showerror(
+                    "Lỗi", "Chọn sai định dạng ảnh! Vui lòng chọn lại.")
                 return
 
             img_label.destroy()
@@ -63,6 +64,35 @@ def open_image():
             print(f"Error: {e}")
             messagebox.showerror("Lỗi", "Đã xảy ra lỗi khi mở ảnh.")
             image_loaded = False
+
+
+def capture_from_camera():
+    global image, zoom_scale, img_label, edges_label, image_loaded, capture
+
+    # Release any existing camera capture
+    if capture is not None and hasattr(capture, 'release'):
+        capture.release()
+
+    # Open a new camera capture
+    # 0 corresponds to the default camera (change if necessary)
+    capture = cv2.VideoCapture(0)
+
+    ret, frame = capture.read()
+    if ret:
+        img_label.destroy()
+        edges_label.destroy()
+
+        # Convert the image to RGB color space
+        image = frame
+
+        # Update zoom scale and other parameters
+        zoom_scale = 1.0
+        image_loaded = True
+        create_image_labels()
+        update_image_display()
+    else:
+        messagebox.showerror("Lỗi", "Không thể mở camera. Vui lòng thử lại.")
+        image_loaded = False
 
 
 def create_image_labels():
@@ -214,6 +244,7 @@ def adjust_contrast():
         messagebox.showerror("Error", "Vui lòng nhập ảnh")
 
 
+capture = None
 image_loaded = False  # Biến kiểm soát trạng thái có ảnh trên giao diện hay không
 edges = None
 zoom_scale = 1.0
@@ -224,6 +255,10 @@ scale_percent = 1
 # Tạo nút "Open Image"
 open_button = tk.Button(window, text="Open Image", command=open_image)
 open_button.pack(pady=10)
+
+capture_button = tk.Button(
+    window, text="Capture from Camera", command=capture_from_camera)
+capture_button.pack(pady=10)
 
 
 # Tạo khung và tiêu đề cho phần cài đặt ngưỡng

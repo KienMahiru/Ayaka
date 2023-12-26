@@ -1,0 +1,70 @@
+
+
+Thuật toán gốc
+	Hàm canny_edge_detection(image, t1, t2)	:
+		Thực hiện phát hiện biên canny trên ảnh đầu vào sử dụng các ngưỡng t1 và t2.
+		Đầu vào:
+		- 	image: ảnh đầu vào để thực hiện phát hiện biên.
+		-	t1, t2: ngưỡng thấp và cao cho việc phát hiện biên.
+		Đầu ra:
+		-	Trả về một ảnh nhị phân biểu diễn các cạnh được phát hiện.
+	Hàm open_image()
+		Cho phép người dùng mở một tệp ảnh từ hộp thoại và hiển thị ảnh đó trong giao diện.
+		Đầu vào:
+		-	Ảnh từ thiết bị	
+		Đầu ra:
+		-	Hiển thị ảnh đã chọn trong giao diện.
+		Bước thực hiện:
+		-	Sử dụng hộp thoại để chọn một tệp ảnh.
+		-	Kiểm tra định dạng tệp và hiển thị thông báo lỗi nếu không phải là định dạng hình ảnh hợp lệ.
+		-	Đọc và hiển thị ảnh gốc sau khi chọn.
+	Hàm tachbien()
+
+		Thực hiện phát hiện biên canny trên ảnh đã chọn sử dụng ngưỡng do người dùng nhập.
+		Đầu vào:
+		-	Ảnh	
+		Đầu ra:
+		-	Hiển thị ảnh biên được phát hiện dựa trên ngưỡng đã nhập.
+		Bước thực hiện:
+		-	Chuyển ảnh đã chọn sang ảnh xám để thực hiện phát hiện biên.
+		-	Lấy giá trị ngưỡng từ người dùng và kiểm tra tính hợp lệ của chúng.
+		-	Thực hiện phát hiện biên canny trên ảnh xám sử dụng các ngưỡng đã nhập.
+		-	Hiển thị ảnh biên đã phát hiện trong giao diện.
+Ý tưởng cải tiến:
+	Chức năng lưu ảnh (save_image(frame)):
+
+	-	Cho phép lưu ảnh gốc hoặc ảnh đã phát hiện biên sau khi đã thực hiện các chức năng trên.
+	-	Kiểm tra nếu có ảnh được tải và xử lý trước khi lưu.
+	-	Hỗ trợ lưu ảnh ở định dạng png hoặc tất cả các định dạng.
+	Chức năng mở ảnh (open_image()):
+
+	-	Cho phép người dùng mở một tệp ảnh từ hộp thoại và hiển thị ảnh đó trong giao diện.
+	-	Kiểm tra định dạng tệp và thông báo lỗi nếu không đúng định dạng ảnh hợp lệ.
+	Chức năng chụp từ camera (capture_from_camera()):
+
+	-	Cho phép chụp ảnh từ camera được kết nối với máy tính.
+	-	Hiển thị ảnh từ camera đã chụp trong giao diện.
+	Chức năng xoay ảnh (xoay()):
+
+	-	Xoay ảnh một góc 90 độ theo chiều kim đồng hồ mỗi khi được gọi.
+	Chức năng thay đổi zoom (zoom_in(), zoom_out()):
+
+	-	Phóng to hoặc thu nhỏ ảnh được hiển thị trên giao diện.
+	Chức năng xóa ảnh (clear_frames()):
+
+	-	Xóa ảnh đang hiển thị trên giao diện.
+	Chức năng điều chỉnh độ tương phản (adjust_contrast()):
+
+	-	Cho phép người dùng điều chỉnh độ tương phản của ảnh theo thanh trượt.
+
+Tương tác người dùng:
+
+-	Người dùng nhấn "mở ảnh" để tải một ảnh.
+-	Sau khi tải, người dùng nhập giá trị ngưỡng thấp và cao.
+-	Khi nhấn "tách biên," thuật toán xử lý ảnh dựa trên các ngưỡng nhập và hiển thị kết quả biên đã phát hiện.
+-	Nhấn zoom in zoom out để phóng to thu nhỏ ảnh.
+-	Nhấn xoay ảnh để xoay ảnh ảnh 90 độ.
+-	Nhấn capture photo để chụp ảnh từ camera của thiết bị.
+-	Nhấn xóa ảnh để xóa ảnh hiển thị trên giao diện.
+-	Nhấn lưu ảnh để lưu ảnh.
+-	Điều chỉnh thanh trượt và nhấn nút áp dụng độ tương phản để thay đổi độ tương phản của ảnh.
