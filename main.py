@@ -94,6 +94,10 @@ def capture_from_camera():
         messagebox.showerror("Lỗi", "Không thể mở camera. Vui lòng thử lại.")
         image_loaded = False
 
+    # Auto-release the camera after capturing
+    if capture is not None and hasattr(capture, 'release'):
+        capture.release()
+
 
 def create_image_labels():
     global img_label, edges_label
