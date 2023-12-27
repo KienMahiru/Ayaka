@@ -127,9 +127,6 @@ def clear_frames():
         print(f"Error: {e}")
 
 
-def canny_edge_detection(image, T1, T2):
-    edges = cv2.Canny(image, T1, T2)
-    return edges
 
 
 # Tách biên ảnh bằng phương pháp Canny
